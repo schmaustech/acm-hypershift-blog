@@ -2,20 +2,20 @@
 
 <img src="hypershift.jpg" style="width: 1000px;" border=0/>
 
- Red Hat Advanced Cluster Management for Kubernetes version 2.6 with the Multicluster Engine Operator 2.1 can deploy Red Hat OpenShift Container Platform clusters by using two different control plane configurations. The standalone configuration uses multiple dedicated virtual machines or physical machines to host the OpenShift Container Platform control plane.  One can also sion hosted control planes to provision the OpenShift Container Platform control plane as pods on a hosting service cluster without the need for dedicated physical machines for each control-plane.
+ Red Hat Advanced Cluster Management for Kubernetes version 2.6 with the Multicluster Engine Operator 2.1 can deploy Red Hat OpenShift Container Platform clusters by using two different control plane configurations. The standalone configuration uses multiple dedicated virtual machines or physical machines to host the OpenShift Container Platform control plane.  One can also deploy hosted control planes to provision the OpenShift Container Platform control plane as pods on a hosting service cluster without the need for dedicated physical machines for each control-plane.
 
-Note: This feature also works with the multicluster engine operator 2.0 without Red Hat Advanced Cluster Management for Kubernetes.
+Note: This feature also works with the Multicluster Engine Operator 2.1 without Red Hat Advanced Cluster Management for Kubernetes.  However additional configuration of the Infrastructure Operator is required.
 
-For Red Hat Advanced Cluster Management, Amazon Web Services is supported as a Technology Preview. You can host the control planes for your Red Hat OpenShift Container Platform version 4.10.7 and later.
+For Red Hat Advanced Cluster Management, Amazon Web Services and bare metal is supported as technology preview. One can host the control planes for your Red Hat OpenShift Container Platform version 4.10.7 and later.
 
 The control plane is run as pods that are contained in a single namespace and is associated with the hosted control plane cluster. When OpenShift Container Platform provisions this type of hosted cluster, it provisions a worker node independent of the control plane.
 
-See the following benefits of hosted control plane clusters:
+The following benefits are yielded when using hosted control plane clusters:
 
-    Saves cost by removing the need to host dedicated control plane nodes
-    Introduces separation between the control plane and the workloads, which improves isolation and reduces configuration errors that can require changes
-    Significantly decreases the cluster provisioning time by removing the requirement for control-plane node bootstrapping
-    Supports turn-key deployments or fully customized OpenShift Container Platform provisioning    
+ * Lowers cost by eliminating the need to host dedicated control plane nodes
+ * Enables separation between the control plane and the workloads for improved isolation
+ * Significantly reduces cluster provision time by removing control-plane node bootstrapping
+ * Supports turn-key deployments or fully customized OpenShift Container Platform provisioning    
 
 
 
