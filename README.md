@@ -1,4 +1,4 @@
-# **Introducing Hosted Clusters on Red Hat Advanced Cluster Management**
+# **Hosted Clusters on Red Hat Advanced Cluster Management**
 
 <img src="hypershift.jpg" style="width: 1000px;" border=0/>
 
