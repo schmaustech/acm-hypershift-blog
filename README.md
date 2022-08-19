@@ -15,7 +15,7 @@ The following benefits are yielded when using hosted control plane clusters:
  * Lowers cost by eliminating the need to host dedicated control plane nodes
  * Enables separation between the control plane and the workloads for improved isolation
  * Significantly reduces cluster provision time by removing control-plane node bootstrapping
- * Supports turn-key deployments or fully customized OpenShift Container Platform provisioning    
+ * Supports vanilla deployments or fully customized OpenShift provisioning    
 
 
 
