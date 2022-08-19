@@ -10,6 +10,8 @@ For Red Hat Advanced Cluster Management, Amazon Web Services and bare metal is s
 
 The control plane is run as pods that are contained in a single namespace and is associated with the hosted control plane cluster. When OpenShift Container Platform provisions this type of hosted cluster, it provisions a worker node independent of the control plane.
 
+## Benefits
+
 The following benefits are yielded when using hosted control plane clusters:
 
  * Lowers cost by eliminating the need to host dedicated control plane nodes
@@ -17,9 +19,7 @@ The following benefits are yielded when using hosted control plane clusters:
  * Significantly reduces cluster provision time by removing control-plane node bootstrapping
  * Supports vanilla deployments or fully customized OpenShift provisioning    
 
-
-
-
+## Lab Environment
 
 Before we walk through a deployment of a hosted cluster lets first take a quick look at the lab environment.   The hub cluster where RHACM 2.6 is running is an OpenShift 4.10.26 compact 3 node cluster.  On this cluster we are runing the following
 
@@ -40,12 +40,16 @@ cef2bbd6-f974-5ecf-331e-db11391fd7a5             false      auto-assign
 d1e0c4b8-6f70-8d5b-93a3-706754ee2ee9             false      auto-assign   
 ~~~
 
+## Enable Hosted Clusters Feature
 
+Since hosted cluster are a technology preview we need to enable them on the hub cluster with the following steps.  The first step is to patch the multiclusterengine and enable the hypershift component:
 
 ~~~bash
 $ oc patch mce multiclusterengine --type=merge -p '{"spec":{"overrides":{"components":[{"name":"hypershift-preview","enabled": true}]}}}'
 multiclusterengine.multicluster.openshift.io/multiclusterengine patched
 ~~~
+
+Once we have patched the multiclusterengine we need to next configure a managed cluster custom resource for our hub cluster:
 
 ~~~bash
 $ cat << EOF > ~/import-hub-kni20.yaml
@@ -61,11 +65,15 @@ spec:
 EOF
 ~~~
 
+With the managed cluster file created we can now apply it to the hub cluster:
+
 ~~~bash
 $ oc apply -f import-hub-kni20.yaml 
 Warning: resource managedclusters/local-cluster is missing the kubectl.kubernetes.io/last-applied-configuration annotation which is required by oc apply. oc apply should only be used on resources created declaratively by either oc create --save-config or oc apply. The missing annotation will be patched automatically.
 managedcluster.cluster.open-cluster-management.io/local-cluster configured
 ~~~
+
+The final configuration step is to enable the managed cluster addon component for hypershift.  Do do this we will create a custom resource like the one below:
 
 ~~~bash
 $ cat << EOF > ~/managed-cluster-addon-kni20.yaml
@@ -79,16 +87,22 @@ spec:
 EOF
 ~~~
 
+Then apply the custom resource file we created above to the hub cluster:
+
 ~~~bash
 $ oc apply -f managed-cluster-addon-kni20.yaml
 managedclusteraddon.addon.open-cluster-management.io/hypershift-addon created
 ~~~
+
+Finally after a few minutes we should see the manage cluster addon for hypershift listed as available:
 
 ~~~bash
 $ oc get managedclusteraddons -n local-cluster hypershift-addon
 NAME               AVAILABLE   DEGRADED   PROGRESSING
 hypershift-addon   True 
 ~~~
+
+
 
 ~~~bash
 cat << EOF > ~/capi-role-kni21.yaml
