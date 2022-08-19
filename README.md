@@ -91,5 +91,37 @@ hypershift-addon   True
 ~~~
 
 ~~~bash
+cat << EOF > ~/capi-role-kni21.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: capi-provider-role
+  namespace: kni21
+rules:
+- apiGroups:
+  - agent-install.openshift.io
+  resources:
+  - agents
+  verbs:
+  - '*'
+EOF
+~~~
 
+~~~bash
+$ oc create -f capi-role-kni21.yaml 
+role.rbac.authorization.k8s.io/capi-provider-role created
+~~~
+
+~~~bash
+
+~~~
+
+~~~bash
+$ oc create -f hosted-cluster-kni21.yaml 
+hostedcluster.hypershift.openshift.io/kni21 created
+secret/pullsecret-cluster-kni21 created
+secret/sshkey-cluster-kni21 created
+nodepool.hypershift.openshift.io/nodepool-kni21-1 created
+managedcluster.cluster.open-cluster-management.io/kni21 created
+klusterletaddonconfig.agent.open-cluster-management.io/kni21 created
 ~~~
