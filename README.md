@@ -113,7 +113,121 @@ role.rbac.authorization.k8s.io/capi-provider-role created
 ~~~
 
 ~~~bash
-
+$ cat hosted-cluster-kni21.yaml 
+---
+apiVersion: hypershift.openshift.io/v1alpha1
+kind: HostedCluster
+metadata:
+  name: 'kni21'
+  namespace: 'kni21'
+  labels:
+    "cluster.open-cluster-management.io/clusterset": 'default'
+spec:
+  release:
+    image: quay.io/openshift-release-dev/ocp-release:4.10.26-x86_64
+  pullSecret:
+    name: pullsecret-cluster-kni21
+  sshKey:
+    name: sshkey-cluster-kni21
+  networking:
+    podCIDR: 10.132.0.0/14
+    serviceCIDR: 172.31.0.0/16
+    machineCIDR: 192.168.0.0/24
+    networkType: OpenShiftSDN
+  platform:
+    type: Agent
+    agent:
+      agentNamespace: 'kni21'
+  infraID: 'kni21'
+  dns:
+    baseDomain: 'schmaustech.com'
+  services:
+  - service: APIServer
+    servicePublishingStrategy:
+      type: NodePort
+      nodePort:
+        address: 192.168.0.210
+        port: 30000
+  - service: OAuthServer
+    servicePublishingStrategy:
+      type: Route
+  - service: OIDC
+    servicePublishingStrategy:
+      type: Route
+  - service: Konnectivity
+    servicePublishingStrategy:
+      type: Route
+  - service: Ignition
+    servicePublishingStrategy:
+      type: Route
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: pullsecret-cluster-kni21
+  namespace: kni21
+data:
+  '.dockerconfigjson': eyJhdXRocyI6eyJwcm92aXNpb25pbmcuc2NobWF1c3RlY2guY29tOjUwMDAiOnsiYXV0aCI6IlpIVnRiWGs2WkhWdGJYaz0iLCJlbWFpbCI6ImJzY2htYXVzQHNjaG1hdXN0ZWNoLmNvbSJ9fX0=
+type: kubernetes.io/dockerconfigjson
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: sshkey-cluster-kni21
+  namespace: 'kni21'
+stringData:
+  id_rsa.pub: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCoy2/8SC8K+9PDNOqeNady8xck4AgXqQkf0uusYfDJ8IS4pFh178AVkz2sz3GSbU41CMxO6IhyQS4Rga3Ft/VlW6ZAW7icz3mw6IrLRacAAeY1BlfxfupQL/yHjKSZRze9vDjfQ9UDqlHF/II779Kz5yRKYqXsCt+wYESU7DzdPuGgbEKXrwi9GrxuXqbRZOz5994dQW7bHRTwuRmF9KzU7gMtMCah+RskLzE46fc2e4zD1AKaQFaEm4aGbJjQkELfcekrE/VH3i35cBUDacGcUYmUEaco3c/+phkNP4Iblz4AiDcN/TpjlhbU3Mbx8ln6W4aaYIyC4EVMfgvkRVS1xzXcHexs1fox724J07M1nhy+YxvaOYorQLvXMGhcBc9Z2Au2GA5qAr5hr96AHgu3600qeji0nMM/0HoiEVbxNWfkj4kAegbItUEVBAWjjpkncbe5Ph9nF2DsBrrg4TsJIplYQ+lGewzLTm/cZ1DnIMZvTY/Vnimh7qa9aRrpMB0= bschmaus@provisioning
+---
+apiVersion: hypershift.openshift.io/v1alpha1
+kind: NodePool
+metadata:
+  name: 'nodepool-kni21-1'
+  namespace: 'kni21'
+spec:
+  clusterName: 'kni21'
+  replicas: 3
+  management:
+    autoRepair: false
+    upgradeType: InPlace
+  platform:
+    type: Agent
+    agent:
+      agentLabelSelector:
+        matchLabels: {}
+  release:
+    image: quay.io/openshift-release-dev/ocp-release:4.10.26-x86_64
+---
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  labels:
+    cloud: hypershift
+    name: 'kni21'
+    cluster.open-cluster-management.io/clusterset: 'default'
+  name: 'kni21'
+spec:
+  hubAcceptsClient: true
+---
+apiVersion: agent.open-cluster-management.io/v1
+kind: KlusterletAddonConfig
+metadata:
+  name: 'kni21'
+  namespace: 'kni21'
+spec:
+  clusterName: 'kni21'
+  clusterNamespace: 'kni21'
+  clusterLabels:
+    cloud: ai-hypershift
+  applicationManager:
+    enabled: true
+  policyController:
+    enabled: true
+  searchCollector:
+    enabled: true
+  certPolicyController:
+    enabled: true
+  iamPolicyController:
+    enabled: true
 ~~~
 
 ~~~bash
