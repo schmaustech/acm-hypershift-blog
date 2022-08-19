@@ -125,3 +125,8 @@ nodepool.hypershift.openshift.io/nodepool-kni21-1 created
 managedcluster.cluster.open-cluster-management.io/kni21 created
 klusterletaddonconfig.agent.open-cluster-management.io/kni21 created
 ~~~
+
+~~~bash
+$ oc extract -n kni21 secret/kni21-admin-kubeconfig --to=- > kni21-kubeconfig
+# kubeconfig
+~~~
