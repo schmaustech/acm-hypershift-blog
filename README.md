@@ -102,7 +102,7 @@ NAME               AVAILABLE   DEGRADED   PROGRESSING
 hypershift-addon   True 
 ~~~
 
-
+## Deploying Hosted Cluster on Bare Metal
 
 ~~~bash
 cat << EOF > ~/capi-role-kni21.yaml
@@ -127,7 +127,7 @@ role.rbac.authorization.k8s.io/capi-provider-role created
 ~~~
 
 ~~~bash
-$ cat hosted-cluster-kni21.yaml 
+$ cat << EOF > ~/hosted-cluster-kni21.yaml 
 ---
 apiVersion: hypershift.openshift.io/v1alpha1
 kind: HostedCluster
@@ -242,7 +242,10 @@ spec:
     enabled: true
   iamPolicyController:
     enabled: true
+EOF
 ~~~
+
+
 
 ~~~bash
 $ oc create -f hosted-cluster-kni21.yaml 
@@ -254,7 +257,17 @@ managedcluster.cluster.open-cluster-management.io/kni21 created
 klusterletaddonconfig.agent.open-cluster-management.io/kni21 created
 ~~~
 
+Now that we have created the kni21 cluster the process should begin to deploy the hosted cluster control plane on our hub cluster.  Along with this the deployment process will also obtain 3 baremetal worker nodes from the kni21 infraenv that were marked as available and incorporate them into our kni21 cluster.  However don't take my word for it lets go ahead and see what is happening as the cluster deploys.
+
+## Commands to run to watch cluster progression
+
+To watch things happening as the cluster deploy we first need to obtain the kubeconfig for our new cluster.  To do this we can run the following extract command a few minutes after we created our hosted cluster:
+
 ~~~bash
-$ oc extract -n kni21 secret/kni21-admin-kubeconfig --to=- > kni21-kubeconfig
+$ oc extract -n kni21 secret/kni21-admin-kubeconfig --to=- > kubeconfig-kni21
 # kubeconfig
+~~~
+
+~~~bash
+
 ~~~
