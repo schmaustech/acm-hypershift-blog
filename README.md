@@ -21,13 +21,22 @@ The following benefits are yielded when using hosted control plane clusters:
 
 ## Lab Environment
 
-Before we walk through a deployment of a hosted cluster lets first take a quick look at the lab environment.   The hub cluster where RHACM 2.6 is running is an OpenShift 4.10.26 compact 3 node cluster.  On this cluster we are runing the following
+Before we walk through a deployment of a hosted cluster lets first take a quick look at the lab environment.   The hub cluster where RHACM 2.6 is running is an OpenShift 4.10.26 compact 3 node bare metal cluster.  On this cluster we are runing the following operators:
+
+ * OpenShift Local Storage
+ * Openshift Data Foundation
+ * Advanced Cluster Management for Kubernetes
+ * Multicluster Enginer for Kubernetes
+
+For convenience we have already gone ahead and configured a infrastructure environment called kni21:
 
 ~~~bash
 $ oc get infraenv -n kni21
 NAME    ISO CREATED AT
 kni21   2022-08-16T20:50:20Z
 ~~~
+
+Inside of the infrastructure environment we have already gone ahead and used the host discovery to bring online 6 bare metal nodes, 3 of which we have marked as approved for availability.   These 3 nodes will become the workers for our hosted cluster we plan to deploy in future steps of this blog.
 
 ~~~bash
 $ oc get agents -n kni21
@@ -39,6 +48,8 @@ NAME                                   CLUSTER   APPROVED   ROLE          STAGE
 cef2bbd6-f974-5ecf-331e-db11391fd7a5             false      auto-assign   
 d1e0c4b8-6f70-8d5b-93a3-706754ee2ee9             false      auto-assign   
 ~~~
+
+Now that we have an understanding how the lab environment is preconfigured we can move onto enabling the hosted cluster feature.
 
 ## Enable Hosted Clusters Feature
 
