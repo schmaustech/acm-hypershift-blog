@@ -163,7 +163,7 @@ metadata:
     "cluster.open-cluster-management.io/clusterset": 'default'
 spec:
   release:
-    image: quay.io/openshift-release-dev/ocp-release:4.10.26-x86_64
+    image: quay.io/openshift-release-dev/ocp-release:4.11.2-x86_64
   pullSecret:
     name: pullsecret-cluster-kni21
   sshKey:
@@ -234,7 +234,7 @@ spec:
       agentLabelSelector:
         matchLabels: {}
   release:
-    image: quay.io/openshift-release-dev/ocp-release:4.10.26-x86_64
+    image: quay.io/openshift-release-dev/ocp-release:4.11.2-x86_64
 ---
 apiVersion: cluster.open-cluster-management.io/v1
 kind: ManagedCluster
