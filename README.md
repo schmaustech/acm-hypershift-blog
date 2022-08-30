@@ -115,6 +115,8 @@ hypershift-addon   True
 
 ## Deploying Hosted Cluster on Bare Metal
 
+A hosted cluster is a cluster whose control plane is deployed on another OpenShift installation.   Since we just finished configuring the hypershift addon in our hub cluster we can now deploy a hosted cluster.   To do that we first need to create a capi provider role in the namespace where we have our discovered hosts.  In this case its the kni21 namespace which also happens to be the name of our hosted cluster we will be deploying.  The capi provider role custom resource file below provides the ability for us to actually see and consume the discovered hosts.  
+
 ~~~bash
 cat << EOF > ~/capi-role-kni21.yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -132,10 +134,22 @@ rules:
 EOF
 ~~~
 
+Once we have created the capi provider role custom resource file lets go ahead and create it against our hub cluster:
+
 ~~~bash
 $ oc create -f capi-role-kni21.yaml 
 role.rbac.authorization.k8s.io/capi-provider-role created
 ~~~
+
+With the role in place we can go forward creating our hosted cluster custom resource file for kni21.  This custom resource file will have multiple sections.   Lets break down those sections and their purpose here:
+
+ * The HostedCluster section of the file defines resources like the cluster name, namespace, release image for the cluster control plane, pull-secret location, sshkey location, cluster dns domain, cluster networking and the various publishing strategies.  I should point out in this configuration we are using the Nodeport API publishing strategy and so the ipaddress defined is just one of the ipaddresses off a worker node on the cluster hosting kni21's control plane.
+ *  The Secret(s) section of the file defines two secrets: one being the pull-secret the hosted cluster will use and the other being the ssk public key the hosted cluster will use for any deployed worker nodes.
+ *  The NodePool section defines the name of the nodepool, the namespace the nodepool should reside in, the number of replicas (workers) to create and the release image for the worker nodes (normally it should be the same image used from the HostedCluster section).
+ *  The ManagedCluster section defines the cluster type (hypershift), the namespace and the hub will accept us as a client
+ *  The KlusterletAddonConfig section defines what additional management capabilities the hub cluster should have visibility to on this hosted cluster.  The standards are defined there from a Red Hat Advanced Cluster Management perspective.
+
+Now that we have a brief understanding of what the custom resource file does lets go ahead and create it:
 
 ~~~bash
 $ cat << EOF > ~/hosted-cluster-kni21.yaml 
@@ -256,7 +270,7 @@ spec:
 EOF
 ~~~
 
-
+With the file created lets go ahead and create it against our hub cluster.  Keep in mind once this step is run it will begin the deployment process of our hosted cluster called kni21:
 
 ~~~bash
 $ oc create -f hosted-cluster-kni21.yaml 
