@@ -40,13 +40,10 @@ Inside of the infrastructure environment we have already gone ahead and used the
 
 ~~~bash
 $ oc get agents -n kni21
-NAME                                   CLUSTER   APPROVED   ROLE          STAGE
-07f25812-6c5b-ece8-a4d5-9a3c2c76fa3a             false      auto-assign   
+NAME                                   CLUSTER   APPROVED   ROLE          STAGE 
 304d2046-5a32-4cec-8c08-96a2b76a6537             true       auto-assign   
 4ca57efe-0940-4fd6-afcb-7db41b8c918b             true       auto-assign   
-65f41daa-7ea8-4637-a7c6-f2cde634404a             true       auto-assign   
-cef2bbd6-f974-5ecf-331e-db11391fd7a5             false      auto-assign   
-d1e0c4b8-6f70-8d5b-93a3-706754ee2ee9             false      auto-assign   
+65f41daa-7ea8-4637-a7c6-f2cde634404a             true       auto-assign     
 ~~~
 
 Now that we have an understanding how the lab environment is preconfigured we can move onto enabling the hosted cluster feature.
@@ -163,7 +160,7 @@ metadata:
     "cluster.open-cluster-management.io/clusterset": 'default'
 spec:
   release:
-    image: quay.io/openshift-release-dev/ocp-release:4.11.2-x86_64
+    image: quay.io/openshift-release-dev/ocp-release:4.10.26-x86_64
   pullSecret:
     name: pullsecret-cluster-kni21
   sshKey:
@@ -234,7 +231,7 @@ spec:
       agentLabelSelector:
         matchLabels: {}
   release:
-    image: quay.io/openshift-release-dev/ocp-release:4.11.2-x86_64
+    image: quay.io/openshift-release-dev/ocp-release:4.10.26-x86_64
 ---
 apiVersion: cluster.open-cluster-management.io/v1
 kind: ManagedCluster
@@ -284,9 +281,179 @@ klusterletaddonconfig.agent.open-cluster-management.io/kni21 created
 
 Now that we have created the kni21 cluster the process should begin to deploy the hosted cluster control plane on our hub cluster.  Along with this the deployment process will also obtain 3 baremetal worker nodes from the kni21 infraenv that were marked as available and incorporate them into our kni21 cluster.  However don't take my word for it lets go ahead and see what is happening as the cluster deploys.
 
-## Commands to run to watch cluster progression
+## Observing Deployment Progression
 
-To watch things happening as the cluster deploy we first need to obtain the kubeconfig for our new cluster.  To do this we can run the following extract command a few minutes after we created our hosted cluster:
+During the hosted cluster deployment process we view a few different commands that show the status and progression of the cluster.  First we can look at the hostedcluster output:
+
+~~~bash
+$ oc get hostedcluster -n kni21
+NAME    VERSION   KUBECONFIG               PROGRESS   AVAILABLE   REASON                    MESSAGE
+kni21             kni21-admin-kubeconfig   Partial    True        HostedClusterAsExpected 
+~~~
+
+~~~bash
+$ oc get hostedcluster -n kni21 -o yaml
+apiVersion: v1
+items:
+- apiVersion: hypershift.openshift.io/v1alpha1
+  kind: HostedCluster
+  metadata:
+    creationTimestamp: "2022-08-18T19:12:25Z"
+    finalizers:
+    - hypershift.openshift.io/finalizer
+    generation: 3
+    labels:
+      cluster.open-cluster-management.io/clusterset: default
+    name: kni21
+    namespace: kni21
+    resourceVersion: "163368743"
+    uid: 18f08f34-181d-4c0c-b110-6128e7fd9cc5
+  spec:
+    autoscaling: {}
+    clusterID: 9fea8391-75f4-46f8-80fa-a59d8eef3832
+    controllerAvailabilityPolicy: SingleReplica
+    dns:
+      baseDomain: schmaustech.com
+    etcd:
+      managementType: Managed
+    fips: false
+    infraID: kni21
+    infrastructureAvailabilityPolicy: SingleReplica
+    issuerURL: https://kubernetes.default.svc
+    networking:
+      machineCIDR: 192.168.0.0/24
+      networkType: OpenShiftSDN
+      podCIDR: 10.132.0.0/14
+      serviceCIDR: 172.31.0.0/16
+    olmCatalogPlacement: management
+    platform:
+      agent:
+        agentNamespace: kni21
+      type: Agent
+    pullSecret:
+      name: pullsecret-cluster-kni21
+    release:
+      image: quay.io/openshift-release-dev/ocp-release:4.10.26-x86_64
+    services:
+    - service: APIServer
+      servicePublishingStrategy:
+        nodePort:
+          address: 192.168.0.210
+          port: 30000
+        type: NodePort
+    - service: OAuthServer
+      servicePublishingStrategy:
+        type: Route
+    - service: OIDC
+      servicePublishingStrategy:
+        type: Route
+    - service: Konnectivity
+      servicePublishingStrategy:
+        type: Route
+    - service: Ignition
+      servicePublishingStrategy:
+        type: Route
+    sshKey:
+      name: sshkey-cluster-kni21
+  status:
+    conditions:
+    - lastTransitionTime: "2022-08-18T19:15:03Z"
+      message: ""
+      observedGeneration: 3
+      reason: AsExpected
+      status: "True"
+      type: ClusterVersionSucceeding
+    - lastTransitionTime: "2022-08-18T19:12:25Z"
+      message: ""
+      observedGeneration: 3
+      reason: ClusterVersionStatusUnknown
+      status: Unknown
+      type: ClusterVersionUpgradeable
+    - lastTransitionTime: "2022-08-18T19:14:20Z"
+      message: ""
+      observedGeneration: 3
+      reason: HostedClusterAsExpected
+      status: "True"
+      type: Available
+    - lastTransitionTime: "2022-08-18T19:12:25Z"
+      message: Configuration passes validation
+      observedGeneration: 3
+      reason: HostedClusterAsExpected
+      status: "True"
+      type: ValidConfiguration
+    - lastTransitionTime: "2022-08-18T19:12:25Z"
+      message: HostedCluster is support by operator configuration
+      observedGeneration: 3
+      reason: HostedClusterAsExpected
+      status: "True"
+      type: SupportedHostedCluster
+    - lastTransitionTime: "2022-08-18T19:13:05Z"
+      message: Configuration passes validation
+      reason: HostedClusterAsExpected
+      status: "True"
+      type: ValidHostedControlPlaneConfiguration
+    - lastTransitionTime: "2022-08-18T19:13:39Z"
+      message: ""
+      observedGeneration: 3
+      reason: IgnitionServerDeploymentAsExpected
+      status: "True"
+      type: IgnitionEndpointAvailable
+    - lastTransitionTime: "2022-08-18T19:12:25Z"
+      message: Reconciliation active on resource
+      observedGeneration: 3
+      reason: ReconciliationActive
+      status: "True"
+      type: ReconciliationActive
+    - lastTransitionTime: "2022-08-18T19:12:28Z"
+      message: Release image is valid
+      observedGeneration: 3
+      reason: AsExpected
+      status: "True"
+      type: ValidReleaseImage
+    - lastTransitionTime: "2022-08-18T19:12:25Z"
+      message: ""
+      observedGeneration: 3
+      reason: ReconciliatonSucceeded
+      status: "True"
+      type: ReconciliationSucceeded
+    ignitionEndpoint: ignition-server-kni21-kni21.apps.kni20.schmaustech.com
+    kubeadminPassword:
+      name: kni21-kubeadmin-password
+    kubeconfig:
+      name: kni21-admin-kubeconfig
+    version:
+      desired:
+        image: quay.io/openshift-release-dev/ocp-release:4.10.26-x86_64
+      history:
+      - completionTime: null
+        image: quay.io/openshift-release-dev/ocp-release:4.10.26-x86_64
+        startedTime: "2022-08-18T19:12:25Z"
+        state: Partial
+        verified: false
+        version: ""
+      observedGeneration: 1
+kind: List
+metadata:
+  resourceVersion: ""
+~~~
+
+~~~bash
+$ oc get agents -n kni21
+NAMESPACE   NAME                                   CLUSTER   APPROVED   ROLE          STAGE
+kni21       304d2046-5a32-4cec-8c08-96a2b76a6537             true       auto-assign   
+kni21       4ca57efe-0940-4fd6-afcb-7db41b8c918b             true       auto-assign   
+kni21       65f41daa-7ea8-4637-a7c6-f2cde634404a             true       auto-assign  
+~~~
+
+We can also see that the agents (workers) have been assigned and what their status is during the deployment
+
+~~~bash
+
+~~~
+
+## Validating Cluster Installation
+
+Once deployment has completed we can validate the cluster.   First need to obtain the kubeconfig for our new cluster.  To do this we can run the following extract command a few minutes after we created our hosted cluster:
 
 ~~~bash
 $ oc extract -n kni21 secret/kni21-admin-kubeconfig --to=- > kubeconfig-kni21
@@ -294,5 +461,107 @@ $ oc extract -n kni21 secret/kni21-admin-kubeconfig --to=- > kubeconfig-kni21
 ~~~
 
 ~~~bash
+$ oc get co --kubeconfig=kubeconfig-kni21
+NAME                                       VERSION   AVAILABLE   PROGRESSING   DEGRADED   SINCE   MESSAGE
+console                                    4.10.26   True        False         False      2m38s   
+csi-snapshot-controller                    4.10.26   True        False         False      4m3s    
+dns                                        4.10.26   True        False         False      2m52s   
+image-registry                             4.10.26   True        False         False      2m8s    
+ingress                                    4.10.26   True        False         False      22m     
+kube-apiserver                             4.10.26   True        False         False      23m     
+kube-controller-manager                    4.10.26   True        False         False      23m     
+kube-scheduler                             4.10.26   True        False         False      23m     
+kube-storage-version-migrator              4.10.26   True        False         False      4m52s   
+monitoring                                 4.10.26   True        False         False      69s     
+network                                    4.10.26   True        False         False      4m3s    
+node-tuning                                4.10.26   True        False         False      2m22s   
+openshift-apiserver                        4.10.26   True        False         False      23m     
+openshift-controller-manager               4.10.26   True        False         False      23m     
+openshift-samples                          4.10.26   True        False         False      2m15s   
+operator-lifecycle-manager                 4.10.26   True        False         False      22m     
+operator-lifecycle-manager-catalog         4.10.26   True        False         False      23m     
+operator-lifecycle-manager-packageserver   4.10.26   True        False         False      23m     
+service-ca                                 4.10.26   True        False         False      4m41s   
+storage                                    4.10.26   True        False         False      4m43s 
+~~~
 
+~~~bash
+$ oc get pods -A --kubeconfig=kubeconfig-kni21
+NAMESPACE                                          NAME                                                      READY   STATUS             RESTARTS        AGE
+kube-system                                        konnectivity-agent-khlqv                                  0/1     Running            0               3m52s
+kube-system                                        konnectivity-agent-nrbvw                                  0/1     Running            0               4m24s
+kube-system                                        konnectivity-agent-s5p7g                                  0/1     Running            0               4m14s
+kube-system                                        kube-apiserver-proxy-asus3-vm1.kni.schmaustech.com        1/1     Running            0               5m56s
+kube-system                                        kube-apiserver-proxy-asus3-vm2.kni.schmaustech.com        1/1     Running            0               6m37s
+kube-system                                        kube-apiserver-proxy-asus3-vm3.kni.schmaustech.com        1/1     Running            0               6m17s
+openshift-cluster-node-tuning-operator             cluster-node-tuning-operator-798fcd89dc-9cf2k             1/1     Running            0               20m
+openshift-cluster-node-tuning-operator             tuned-dhw5p                                               1/1     Running            0               109s
+openshift-cluster-node-tuning-operator             tuned-dlp8f                                               1/1     Running            0               110s
+openshift-cluster-node-tuning-operator             tuned-l569k                                               1/1     Running            0               109s
+openshift-cluster-samples-operator                 cluster-samples-operator-6b5bcb9dff-kpnbc                 2/2     Running            0               20m
+openshift-cluster-storage-operator                 cluster-storage-operator-5f784969f5-vwzgz                 1/1     Running            1 (113s ago)    20m
+openshift-cluster-storage-operator                 csi-snapshot-controller-6b7687b7d9-7nrfw                  1/1     Running            0               3m8s
+openshift-cluster-storage-operator                 csi-snapshot-controller-6b7687b7d9-csksg                  1/1     Running            0               3m9s
+openshift-cluster-storage-operator                 csi-snapshot-controller-operator-7f4d9fc5b8-hkvrk         1/1     Running            0               20m
+openshift-cluster-storage-operator                 csi-snapshot-webhook-6759b5dc8b-7qltn                     1/1     Running            0               3m12s
+openshift-cluster-storage-operator                 csi-snapshot-webhook-6759b5dc8b-f8bqk                     1/1     Running            0               3m12s
+openshift-console-operator                         console-operator-8675b58c4c-flc5p                         1/1     Running            1 (96s ago)     20m
+openshift-console                                  console-5cbf6c7969-6gk6z                                  1/1     Running            0               119s
+openshift-console                                  downloads-7bcd756565-6wj5j                                1/1     Running            0               4m3s
+openshift-dns-operator                             dns-operator-77d755cd8c-xjfbn                             2/2     Running            0               21m
+openshift-dns                                      dns-default-jwjkz                                         2/2     Running            0               113s
+openshift-dns                                      dns-default-kfqnh                                         2/2     Running            0               113s
+openshift-dns                                      dns-default-xlqsm                                         2/2     Running            0               113s
+openshift-dns                                      node-resolver-jzxnd                                       1/1     Running            0               110s
+openshift-dns                                      node-resolver-xqdr5                                       1/1     Running            0               110s
+openshift-dns                                      node-resolver-zl6h4                                       1/1     Running            0               110s
+openshift-image-registry                           cluster-image-registry-operator-64fcfdbf5-r7d5t           1/1     Running            0               20m
+openshift-image-registry                           image-registry-7fdfd99d68-t9pq9                           1/1     Running            0               53s
+openshift-image-registry                           node-ca-hkfnr                                             1/1     Running            0               56s
+openshift-image-registry                           node-ca-vlsdl                                             1/1     Running            0               56s
+openshift-image-registry                           node-ca-xqnsw                                             1/1     Running            0               56s
+openshift-ingress-canary                           ingress-canary-86z6r                                      1/1     Running            0               4m13s
+openshift-ingress-canary                           ingress-canary-8jhxk                                      1/1     Running            0               3m52s
+openshift-ingress-canary                           ingress-canary-cv45h                                      1/1     Running            0               4m24s
+openshift-ingress                                  router-default-6bb8944f66-z2lxr                           1/1     Running            0               20m
+openshift-kube-storage-version-migrator-operator   kube-storage-version-migrator-operator-56b57b4844-p9zgp   1/1     Running            1 (2m16s ago)   20m
+openshift-kube-storage-version-migrator            migrator-58bb4d89d5-5sl9w                                 1/1     Running            0               3m30s
+openshift-monitoring                               alertmanager-main-0                                       6/6     Running            0               100s
+openshift-monitoring                               cluster-monitoring-operator-5bc5885cd4-dwbc4              2/2     Running            0               20m
+openshift-monitoring                               grafana-78f798868c-wd84p                                  3/3     Running            0               94s
+openshift-monitoring                               kube-state-metrics-58b8f97f6c-6kp4v                       3/3     Running            0               104s
+openshift-monitoring                               node-exporter-ll7cp                                       2/2     Running            0               103s
+openshift-monitoring                               node-exporter-tgsqg                                       2/2     Running            0               103s
+openshift-monitoring                               node-exporter-z99gr                                       2/2     Running            0               103s
+openshift-monitoring                               openshift-state-metrics-677b9fb74f-qqp6g                  3/3     Running            0               104s
+openshift-monitoring                               prometheus-adapter-f69fff5f9-7tdn9                        0/1     Running            0               17s
+openshift-monitoring                               prometheus-k8s-0                                          6/6     Running            0               93s
+openshift-monitoring                               prometheus-operator-6b9d4fd9bd-tqfcx                      2/2     Running            0               2m2s
+openshift-monitoring                               telemeter-client-74d599658c-wqw5j                         3/3     Running            0               101s
+openshift-monitoring                               thanos-querier-64c8757854-z4lll                           6/6     Running            0               98s
+openshift-multus                                   multus-additional-cni-plugins-cqst9                       1/1     Running            0               6m14s
+openshift-multus                                   multus-additional-cni-plugins-dbmkj                       1/1     Running            0               5m56s
+openshift-multus                                   multus-additional-cni-plugins-kcwl9                       1/1     Running            0               6m14s
+openshift-multus                                   multus-admission-controller-22cmb                         2/2     Running            0               3m52s
+openshift-multus                                   multus-admission-controller-256tn                         2/2     Running            0               4m13s
+openshift-multus                                   multus-admission-controller-mz9jm                         2/2     Running            0               4m24s
+openshift-multus                                   multus-bxgvr                                              1/1     Running            0               6m14s
+openshift-multus                                   multus-dmkdc                                              1/1     Running            0               6m14s
+openshift-multus                                   multus-gqw2f                                              1/1     Running            0               5m56s
+openshift-multus                                   network-metrics-daemon-6cx4x                              2/2     Running            0               5m56s
+openshift-multus                                   network-metrics-daemon-gz4jp                              2/2     Running            0               6m13s
+openshift-multus                                   network-metrics-daemon-jq9j4                              2/2     Running            0               6m13s
+openshift-network-diagnostics                      network-check-source-8497dc8f86-cn4nm                     1/1     Running            0               5m59s
+openshift-network-diagnostics                      network-check-target-d8db9                                1/1     Running            0               5m58s
+openshift-network-diagnostics                      network-check-target-jdbv8                                1/1     Running            0               5m58s
+openshift-network-diagnostics                      network-check-target-zzmdv                                1/1     Running            0               5m55s
+openshift-network-operator                         network-operator-f5b48cd67-x5dcz                          1/1     Running            0               21m
+openshift-sdn                                      sdn-452r2                                                 2/2     Running            0               5m56s
+openshift-sdn                                      sdn-68g69                                                 2/2     Running            0               6m
+openshift-sdn                                      sdn-controller-4v5mv                                      2/2     Running            0               5m56s
+openshift-sdn                                      sdn-controller-crscc                                      2/2     Running            0               6m1s
+openshift-sdn                                      sdn-controller-fxtn9                                      2/2     Running            0               6m1s
+openshift-sdn                                      sdn-n5jm5                                                 2/2     Running            0               6m
+openshift-service-ca-operator                      service-ca-operator-5bf7f9d958-vnqcg                      1/1     Running            1 (2m ago)      20m
+openshift-service-ca                               service-ca-6c54d7944b-v5mrw                               1/1     Running            0               3m8s
 ~~~
