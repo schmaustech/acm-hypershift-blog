@@ -283,13 +283,15 @@ Now that we have created the kni21 cluster the process should begin to deploy th
 
 ## Observing Deployment Progression
 
-During the hosted cluster deployment process we view a few different commands that show the status and progression of the cluster.  First we can look at the hostedcluster output:
+During the hosted cluster deployment process we view a few different commands that show the status and progression of the cluster.  The commands below are just a snapshot in time during the cluster deployment so the output can vary.   These commands can also be helpful in troubleshooting should the deploy not be progressing.  First we can look at the hostedcluster output:
 
 ~~~bash
 $ oc get hostedcluster -n kni21
 NAME    VERSION   KUBECONFIG               PROGRESS   AVAILABLE   REASON                    MESSAGE
 kni21             kni21-admin-kubeconfig   Partial    True        HostedClusterAsExpected 
 ~~~
+
+And then if we want to see a deeper detail on the hostedcluster to see status of the various stages:
 
 ~~~bash
 $ oc get hostedcluster -n kni21 -o yaml
@@ -437,6 +439,8 @@ metadata:
   resourceVersion: ""
 ~~~
 
+We can also look at the agents to see if they have been assigned to the cluster yet.  In the example below run before they were automatically assigned we can see the cluster column is still absent of the kni21 cluster name:
+
 ~~~bash
 $ oc get agents -n kni21
 NAMESPACE   NAME                                   CLUSTER   APPROVED   ROLE          STAGE
@@ -445,10 +449,12 @@ kni21       4ca57efe-0940-4fd6-afcb-7db41b8c918b             true       auto-ass
 kni21       65f41daa-7ea8-4637-a7c6-f2cde634404a             true       auto-assign  
 ~~~
 
-We can also see that the agents (workers) have been assigned and what their status is during the deployment
+We can also see that nodepool status:
 
 ~~~bash
-
+$ oc get nodepool -A
+NAMESPACE   NAME               CLUSTER   DESIRED NODES   CURRENT NODES   AUTOSCALING   AUTOREPAIR   VERSION   UPDATINGVERSION   UPDATINGCONFIG   MESSAGE
+kni21       nodepool-kni21-1   kni21     3               3               False 
 ~~~
 
 ## Validating Cluster Installation
@@ -459,6 +465,8 @@ Once deployment has completed we can validate the cluster.   First need to obtai
 $ oc extract -n kni21 secret/kni21-admin-kubeconfig --to=- > kubeconfig-kni21
 # kubeconfig
 ~~~
+
+Now that we have the kubeconfig we can use it to view the cluster operators of our hostedcluster:
 
 ~~~bash
 $ oc get co --kubeconfig=kubeconfig-kni21
@@ -484,6 +492,8 @@ operator-lifecycle-manager-packageserver   4.10.26   True        False         F
 service-ca                                 4.10.26   True        False         False      4m41s   
 storage                                    4.10.26   True        False         False      4m43s 
 ~~~
+
+Further we can also look at the running pods on our kni21 cluster:
 
 ~~~bash
 $ oc get pods -A --kubeconfig=kubeconfig-kni21
@@ -565,3 +575,5 @@ openshift-sdn                                      sdn-n5jm5                    
 openshift-service-ca-operator                      service-ca-operator-5bf7f9d958-vnqcg                      1/1     Running            1 (2m ago)      20m
 openshift-service-ca                               service-ca-6c54d7944b-v5mrw                               1/1     Running            0               3m8s
 ~~~
+
+With our hosted cluster 
