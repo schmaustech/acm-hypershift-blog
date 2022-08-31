@@ -283,7 +283,7 @@ Now that we have created the kni21 cluster the process should begin to deploy th
 
 ## Observing Deployment Progression
 
-During the hosted cluster deployment process we view a few different commands that show the status and progression of the cluster.  The commands below are just a snapshot in time during the cluster deployment so the output can vary.   These commands can also be helpful in troubleshooting should the deploy not be progressing.  First we can look at the hostedcluster output:
+During the hosted cluster deployment process we view a few different commands that show the status and progression of the cluster.  The commands below are just a snapshot in time during the cluster deployment so the output can vary.   These commands can also be helpful in troubleshooting should the deploy not be progressing.  First we can look at the hosted cluster output:
 
 ~~~bash
 $ oc get hostedcluster -n kni21
@@ -466,7 +466,7 @@ $ oc extract -n kni21 secret/kni21-admin-kubeconfig --to=- > kubeconfig-kni21
 # kubeconfig
 ~~~
 
-Now that we have the kubeconfig we can use it to view the cluster operators of our hostedcluster:
+Now that we have the kubeconfig we can use it to view the cluster operators of our hosted cluster:
 
 ~~~bash
 $ oc get co --kubeconfig=kubeconfig-kni21
@@ -493,7 +493,7 @@ service-ca                                 4.10.26   True        False         F
 storage                                    4.10.26   True        False         False      4m43s 
 ~~~
 
-Further we can also look at the running pods on our kni21 cluster:
+Further we can also look at the running pods on our hosted kni21 cluster:
 
 ~~~bash
 $ oc get pods -A --kubeconfig=kubeconfig-kni21
@@ -576,4 +576,4 @@ openshift-service-ca-operator                      service-ca-operator-5bf7f9d95
 openshift-service-ca                               service-ca-6c54d7944b-v5mrw                               1/1     Running            0               3m8s
 ~~~
 
-With our hosted cluster 
+Hopefully this gives a taste of what it is like to deploy a bare metal hosted cluster from the command line when using Red Hat Advanced Cluster Management for Kubernetes 2.6!
