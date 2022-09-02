@@ -1,8 +1,8 @@
-# **Hosted Clusters on Red Hat Advanced Cluster Management for Kubernetes**
+# **Bare Metal Hosted Clusters on Red Hat Advanced Cluster Management for Kubernetes**
 
 <img src="hypershift.jpg" style="width: 1000px;" border=0/>
 
- Red Hat Advanced Cluster Management for Kubernetes version 2.6 with the Multicluster Engine Operator 2.1 can deploy Red Hat OpenShift Container Platform clusters by using two different control plane configurations. The standalone configuration uses multiple dedicated virtual machines or physical machines to host the OpenShift Container Platform control plane.  One can also deploy hosted control planes to provision the OpenShift Container Platform control plane as pods on a hosting service cluster without the need for dedicated physical machines for each control-plane.
+ Red Hat Advanced Cluster Management for Kubernetes version 2.6 with the [Multicluster Engine Operator](https://www.redhat.com/en/blog/mastering-kubernetes-cluster-lifecycle-management-multicluster-engine-kubernetes-operator) 2.1 can deploy Red Hat OpenShift Container Platform clusters by using two different control plane configurations. The standalone configuration uses multiple dedicated virtual machines or physical machines to host the OpenShift Container Platform control plane.  One can also deploy [hosted control planes](https://cloud.redhat.com/blog/hosted-control-planes-is-here-as-tech-preview) to provision the OpenShift Container Platform control plane as pods on a hosting service cluster without the need for dedicated physical machines for each control-plane.
 
 Note: This feature also works with the Multicluster Engine Operator 2.1 without Red Hat Advanced Cluster Management for Kubernetes.  However additional configuration of the Infrastructure Operator is required.
 
@@ -50,7 +50,13 @@ Now that we have an understanding how the lab environment is preconfigured we ca
 
 ## Enable Hosted Clusters Feature
 
-Since hosted clusters are a technology preview we need to enable them on the hub cluster with the following steps.  The first step is to patch the multiclusterengine and enable the hypershift component:
+Since hosted clusters are a technology preview we need to enable them on our ACM hub cluster.  This involves at a high level the following steps:
+
+* Enable Multicluster Engine to watch all namespaces
+* Enable the local-cluster
+* Enable the Hypershift addon
+
+Let's get started first by patching the multiclusterengine and enable the hypershift component:
 
 ~~~bash
 $ oc patch mce multiclusterengine --type=merge -p '{"spec":{"overrides":{"components":[{"name":"hypershift-preview","enabled": true}]}}}'
