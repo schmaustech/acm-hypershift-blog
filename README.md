@@ -116,7 +116,7 @@ NAME               AVAILABLE   DEGRADED   PROGRESSING
 hypershift-addon   True 
 ~~~
 
-At this point we have done all the prepatory steps on our hub cluster which will enable us to move to where the real magic happens with hosted clusters and their ability to reduce the number of bare metal nodes required.
+At this point we have done all the prepatory steps on our hub cluster which will enable us to move to where the real magic happens with hosted clusters and their ability to reduce the need for bare metal hosts on the control plane.
 
 ## Deploying Hosted Cluster on Bare Metal
 
