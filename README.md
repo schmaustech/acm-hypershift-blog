@@ -50,7 +50,7 @@ Now that we have an understanding how the lab environment is preconfigured we ca
 
 ## Enable Hosted Clusters Feature
 
-Since hosted clusters are a technology preview we need to enable them on our ACM hub cluster.  This involves at a high level the following steps:
+Since hosted clusters are a technology preview we need to enable them on our Advanced Cluster Management hub cluster.  This involves at a high level the following steps:
 
 * Enable Multicluster Engine to watch all namespaces
 * Enable the local-cluster
@@ -115,6 +115,8 @@ $ oc get managedclusteraddons -n local-cluster hypershift-addon
 NAME               AVAILABLE   DEGRADED   PROGRESSING
 hypershift-addon   True 
 ~~~
+
+At this point we have done all the prepatory steps on our hub cluster which will enable us to move to where the real magic happens with hosted clusters and their ability to reduce the number of bare metal nodes required.
 
 ## Deploying Hosted Cluster on Bare Metal
 
