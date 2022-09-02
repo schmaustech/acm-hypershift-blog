@@ -46,6 +46,20 @@ NAME                                   CLUSTER   APPROVED   ROLE          STAGE
 65f41daa-7ea8-4637-a7c6-f2cde634404a             true       auto-assign     
 ~~~
 
+The last point I want to make here is on my DNS configuration.  For a bare metal hosted cluster configuration one has two choices: load balancer or node port.  I am using the latter here and hence I have configured my DNS API and Ingress for my kni21 hosted cluster to point to specific addresses.  The API address is pointing to the node where my hosted cluster control plane will be running.   My ingress I decided to use round robin DNS across the worker nodes addresses since I was not certain which nodes would get the ingress containers and it seems to work for my testing.   Ideally when I can I would like to attempt using a load balancer as that seems more elegant but for this blog we will stick to node port.
+
+~~~bash
+Name:	api.kni21.schmaustech.com
+Address: 192.168.0.211
+
+Name:	*.apps.kni21.schmaustech.com
+Address: 192.168.0.116
+Name:	*.apps.kni21.schmaustech.com
+Address: 192.168.0.118
+Name:	*.apps.kni21.schmaustech.com
+Address: 192.168.0.117
+~~~
+
 Now that we have an understanding how the lab environment is preconfigured we can move onto enabling the hosted cluster feature.
 
 ## Enable Hosted Clusters Feature
